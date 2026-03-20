@@ -94,14 +94,15 @@ def products():
                            search=search)
 
 
-@bp.route('/product/<slug>')
-def product_detail(slug):
-    """Product detail page"""
-    # Try to find by slug, fallback to id for backward compatibility
-    product = Product.query.filter_by(slug=slug, is_hidden=False).first()
+@bp.route('/product/<identifier>')
+def product_detail(identifier):
+    """Product detail page - works with both slug and ID"""
+    # Try to find by slug first
+    product = Product.query.filter_by(slug=identifier, is_hidden=False).first()
 
-    if not product and slug.isdigit():
-        product = Product.query.get(int(slug))
+    # If not found and identifier is a number, try by ID
+    if not product and identifier.isdigit():
+        product = Product.query.get(int(identifier))
 
     if not product:
         abort(404)
@@ -122,14 +123,13 @@ def product_detail(slug):
     db.session.add(activity)
     db.session.commit()
 
-    # Get related products (same price range or similar)
+    # Get related products
     related = Product.query.filter(
         Product.id != product.id,
         Product.is_hidden == False,
         Product.price.between(product.price * 0.7, product.price * 1.3)
     ).order_by(Product.views.desc()).limit(4).all()
 
-    # Initialize message form
     form = MessageForm()
 
     return render_template('pages/public/product.html',
@@ -137,7 +137,6 @@ def product_detail(slug):
                            business=business,
                            related=related,
                            form=form)
-
 
 from app.utils.notifications import NotificationService
 

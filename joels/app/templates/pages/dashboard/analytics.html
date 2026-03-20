@@ -5,195 +5,740 @@
 
 {% block dashboard_content %}
 <style>
-/* Responsive Fixes */
-@media (max-width: 768px) {
-    .date-range-container {
-        flex-direction: column !important;
-        align-items: stretch !important;
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
     }
-
-    .date-buttons {
-        justify-content: center !important;
-        width: 100% !important;
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
+}
 
-    .custom-date-range {
-        flex-direction: column !important;
-        width: 100% !important;
-        gap: 0.75rem !important;
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
     }
-
-    .custom-date-range input {
-        width: 100% !important;
+    to {
+        opacity: 1;
+        transform: translateX(0);
     }
+}
 
-    .custom-date-range button {
-        width: 100% !important;
-    }
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
 
+/* Loading Overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.loading-overlay.active {
+    display: flex;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(37,99,235,0.2);
+    border-top-color: #2563eb;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Date Range Selector */
+.date-range-container {
+    background: rgba(20,20,30,0.4);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    animation: fadeInUp 0.4s ease;
+}
+
+.date-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.range-btn {
+    padding: 0.5rem 1rem;
+    background: rgba(255,255,255,0.05);
+    color: var(--text-light);
+    border: 1px solid var(--border-subtle);
+    border-radius: 50px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.range-btn.active {
+    background: var(--accent-primary);
+    color: white;
+    border-color: var(--accent-primary);
+}
+
+.range-btn:hover {
+    background: rgba(255,255,255,0.1);
+    transform: translateY(-2px);
+}
+
+.custom-date-range {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.custom-date-range input {
+    padding: 0.5rem;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    color: var(--text-light);
+    font-size: 0.85rem;
+}
+
+.custom-date-range button {
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    border: none;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+}
+
+.custom-date-range button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--accent-glow);
+}
+
+/* Metrics Grid */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.metric-card {
+    background: rgba(20,20,30,0.4);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: all 0.3s ease;
+    animation: fadeInUp 0.4s ease backwards;
+}
+
+.metric-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(37,99,235,0.3);
+}
+
+.metric-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, rgba(37,99,235,0.2), rgba(59,130,246,0.1));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: var(--accent-primary);
+    flex-shrink: 0;
+}
+
+.metric-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.metric-label {
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    margin-bottom: 0.25rem;
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.metric-value {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-light);
+    line-height: 1.2;
+    word-break: break-word;
+}
+
+.metric-trend {
+    font-size: 0.65rem;
+    margin-left: 0.5rem;
+}
+
+.metric-trend.up { color: #10b981; }
+.metric-trend.down { color: #ef4444; }
+
+/* Charts Grid */
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.chart-card {
+    background: rgba(20,20,30,0.4);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    padding: 1rem;
+    transition: all 0.3s ease;
+    animation: fadeInUp 0.4s ease 0.2s both;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.chart-header h3 {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-light);
+    font-weight: 600;
+}
+
+.chart-container {
+    overflow-x: auto;
+}
+
+.chart-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+    min-width: 500px;
+}
+
+.chart-bar-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.chart-bar {
+    width: 100%;
+    background: linear-gradient(to top, var(--accent-primary), var(--accent-secondary));
+    border-radius: 5px 5px 0 0;
+    transition: height 0.3s ease;
+}
+
+.chart-label {
+    color: var(--text-muted);
+    font-size: 0.65rem;
+    transform: rotate(-45deg);
+    white-space: nowrap;
+}
+
+/* Popular Products Table */
+.products-table-wrapper {
+    background: rgba(20,20,30,0.4);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    animation: fadeInUp 0.4s ease 0.3s both;
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.table-header h3 {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-light);
+    font-weight: 600;
+}
+
+.table-sort select {
+    padding: 0.4rem 0.75rem;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    color: var(--text-light);
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 500px;
+}
+
+.data-table th {
+    padding: 0.75rem;
+    text-align: left;
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 0.75rem;
+    background: rgba(0,0,0,0.3);
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.data-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border-subtle);
+    color: var(--text-light);
+    font-size: 0.8rem;
+}
+
+.product-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.product-thumb {
+    width: 35px;
+    height: 35px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+/* Insights Grid */
+.insights-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    animation: fadeInUp 0.4s ease 0.4s both;
+}
+
+.insight-card {
+    background: rgba(20,20,30,0.4);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    padding: 1rem;
+}
+
+.insight-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-light);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.insight-title i {
+    color: var(--accent-primary);
+}
+
+/* Peak Hours */
+.peak-hours-container {
+    overflow-x: auto;
+}
+
+.peak-hours-bars {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 0.5rem;
+    min-width: 350px;
+}
+
+.peak-hour {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.peak-bar {
+    width: 100%;
+    background: linear-gradient(to top, var(--accent-primary), var(--accent-secondary));
+    border-radius: 5px 5px 0 0;
+}
+
+.peak-label {
+    color: var(--text-muted);
+    font-size: 0.65rem;
+}
+
+/* Location Items */
+.location-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.location-name {
+    width: 70px;
+    color: var(--text-light);
+    font-size: 0.8rem;
+}
+
+.location-bar-container {
+    flex: 1;
+    min-width: 100px;
+}
+
+.location-bar-bg {
+    width: 100%;
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.location-bar-fill {
+    height: 100%;
+    background: var(--accent-primary);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.location-percent {
+    width: 45px;
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    text-align: right;
+}
+
+/* Device Items */
+.device-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.device-icon {
+    width: 28px;
+    color: var(--accent-primary);
+    font-size: 0.9rem;
+}
+
+.device-name {
+    flex: 1;
+    color: var(--text-light);
+    font-size: 0.8rem;
+}
+
+.device-percent {
+    width: 40px;
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    text-align: right;
+}
+
+.device-bar {
+    width: 80px;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
     .metrics-grid {
-        grid-template-columns: 1fr !important;
-        gap: 1rem !important;
-    }
-
-    .charts-grid {
-        grid-template-columns: 1fr !important;
-        gap: 1rem !important;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
     }
 
     .insights-grid {
-        grid-template-columns: 1fr !important;
-        gap: 1rem !important;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+    }
+}
+
+@media (max-width: 992px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
     }
 
-    .chart-container {
-        overflow-x: auto !important;
+    .insights-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .date-buttons {
+        justify-content: center;
     }
 
-    .chart-bars {
-        min-width: 600px !important;
+    .custom-date-range {
+        justify-content: center;
     }
 
-    .table-container {
-        overflow-x: auto !important;
+    .custom-date-range input {
+        flex: 1;
+        min-width: 100px;
     }
 
-    .location-item {
-        flex-wrap: wrap !important;
-        gap: 0.5rem !important;
+    .metrics-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
     }
 
-    .location-bar {
-        width: 100% !important;
-        margin: 0 !important;
+    .metric-card {
+        padding: 0.875rem;
     }
 
-    .device-item {
-        flex-wrap: wrap !important;
+    .metric-icon {
+        width: 42px;
+        height: 42px;
+        font-size: 1rem;
+    }
+
+    .metric-value {
+        font-size: 1.2rem;
+    }
+
+    .chart-card {
+        padding: 0.875rem;
+    }
+
+    .chart-header h3 {
+        font-size: 0.85rem;
+    }
+
+    .insights-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .insight-card {
+        padding: 0.875rem;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .product-thumb {
+        width: 30px;
+        height: 30px;
+    }
+
+    .location-name {
+        width: 60px;
+        font-size: 0.75rem;
+    }
+
+    .location-percent {
+        width: 40px;
+    }
+}
+
+@media (max-width: 480px) {
+    .date-buttons {
+        gap: 0.35rem;
+    }
+
+    .range-btn {
+        padding: 0.35rem 0.7rem;
+        font-size: 0.7rem;
+    }
+
+    .custom-date-range input {
+        font-size: 0.7rem;
+        padding: 0.35rem;
+    }
+
+    .custom-date-range button {
+        padding: 0.35rem 0.7rem;
+        font-size: 0.7rem;
+    }
+
+    .metric-value {
+        font-size: 1rem;
+    }
+
+    .metric-label {
+        font-size: 0.6rem;
+    }
+
+    .metric-icon {
+        width: 38px;
+        height: 38px;
+        font-size: 0.9rem;
+    }
+
+    .chart-label {
+        font-size: 0.55rem;
+    }
+
+    .data-table th,
+    .data-table td {
+        font-size: 0.7rem;
+    }
+
+    .location-name {
+        width: 50px;
+        font-size: 0.7rem;
+    }
+
+    .device-name {
+        font-size: 0.75rem;
     }
 
     .device-bar {
-        width: 100% !important;
-        margin-top: 0.5rem !important;
-    }
-
-    .peak-hours {
-        overflow-x: auto !important;
-    }
-
-    .peak-hours-bars {
-        min-width: 400px !important;
+        width: 60px;
     }
 }
 </style>
 
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-spinner"></div>
+</div>
+
 <!-- Date Range Selector -->
-<div style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem;">
-    <div class="date-range-container" style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between;">
-        <div class="date-buttons" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-            <button class="range-btn active" data-days="7" style="padding: 0.5rem 1rem; background: var(--accent-primary); color: white; border: none; border-radius: 50px; font-size: 0.85rem; cursor: pointer;">7 days</button>
-            <button class="range-btn" data-days="30" style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.05); color: var(--text-light); border: 1px solid var(--border-subtle); border-radius: 50px; font-size: 0.85rem; cursor: pointer;">30 days</button>
-            <button class="range-btn" data-days="90" style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.05); color: var(--text-light); border: 1px solid var(--border-subtle); border-radius: 50px; font-size: 0.85rem; cursor: pointer;">90 days</button>
-            <button class="range-btn" data-days="365" style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.05); color: var(--text-light); border: 1px solid var(--border-subtle); border-radius: 50px; font-size: 0.85rem; cursor: pointer;">Year</button>
-        </div>
-        <div class="custom-date-range" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-            <input type="date" id="startDate" style="padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-light); font-size: 0.85rem;">
-            <span style="color: var(--text-muted);">to</span>
-            <input type="date" id="endDate" style="padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-light); font-size: 0.85rem;">
-            <button id="applyCustomRange" class="btn btn-primary" style="padding: 0.5rem 1rem; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); border: none; border-radius: 8px; color: white; cursor: pointer; font-size: 0.85rem;">Apply</button>
-        </div>
+<div class="date-range-container">
+    <div class="date-buttons">
+        <button class="range-btn active" data-days="7">7 days</button>
+        <button class="range-btn" data-days="30">30 days</button>
+        <button class="range-btn" data-days="90">90 days</button>
+        <button class="range-btn" data-days="365">Year</button>
+    </div>
+    <div class="custom-date-range">
+        <input type="date" id="startDate" value="{{ request.args.get('start', '') }}">
+        <span>to</span>
+        <input type="date" id="endDate" value="{{ request.args.get('end', '') }}">
+        <button id="applyCustomRange">Apply</button>
     </div>
 </div>
 
 <!-- Key Metrics -->
-<div class="metrics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
-    <div style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1rem; display: flex; align-items: center; gap: 0.75rem;">
-        <div style="width: 50px; height: 50px; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-            <i class="fas fa-eye" style="font-size: 1.2rem; color: white;"></i>
-        </div>
-        <div>
-            <span style="color: var(--text-muted); font-size: 0.75rem; display: block; margin-bottom: 0.25rem;">Total Views</span>
-            <span style="font-size: 1.5rem; font-weight: 600; color: var(--text-light);">{{ "{:,.0f}".format(total_views|default(0)) }}</span>
-            <span style="color: #10b981; font-size: 0.7rem; margin-left: 0.5rem;">+12%</span>
+<div class="metrics-grid">
+    <div class="metric-card" style="animation-delay: 0.05s;">
+        <div class="metric-icon"><i class="fas fa-eye"></i></div>
+        <div class="metric-content">
+            <span class="metric-label">Total Views</span>
+            <span class="metric-value">{{ "{:,.0f}".format(total_views|default(0)) }}</span>
+            <span class="metric-trend up"><i class="fas fa-arrow-up"></i> 12%</span>
         </div>
     </div>
 
-    <div style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1rem; display: flex; align-items: center; gap: 0.75rem;">
-        <div style="width: 50px; height: 50px; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-            <i class="fas fa-envelope" style="font-size: 1.2rem; color: white;"></i>
-        </div>
-        <div>
-            <span style="color: var(--text-muted); font-size: 0.75rem; display: block; margin-bottom: 0.25rem;">Messages</span>
-            <span style="font-size: 1.5rem; font-weight: 600; color: var(--text-light);">{{ "{:,.0f}".format(total_messages|default(0)) }}</span>
-            <span style="color: #10b981; font-size: 0.7rem; margin-left: 0.5rem;">+5%</span>
+    <div class="metric-card" style="animation-delay: 0.1s;">
+        <div class="metric-icon"><i class="fas fa-envelope"></i></div>
+        <div class="metric-content">
+            <span class="metric-label">Messages</span>
+            <span class="metric-value">{{ "{:,.0f}".format(total_messages|default(0)) }}</span>
+            <span class="metric-trend up"><i class="fas fa-arrow-up"></i> 5%</span>
         </div>
     </div>
 
-    <div style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1rem; display: flex; align-items: center; gap: 0.75rem;">
-        <div style="width: 50px; height: 50px; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-            <i class="fas fa-chart-line" style="font-size: 1.2rem; color: white;"></i>
-        </div>
-        <div>
-            <span style="color: var(--text-muted); font-size: 0.75rem; display: block; margin-bottom: 0.25rem;">Conversion Rate</span>
-            <span style="font-size: 1.5rem; font-weight: 600; color: var(--text-light);">{{ "%.1f"|format(conversion_rate|default(0)) }}%</span>
-            <span style="color: #ef4444; font-size: 0.7rem; margin-left: 0.5rem;">-2%</span>
+    <div class="metric-card" style="animation-delay: 0.15s;">
+        <div class="metric-icon"><i class="fas fa-chart-line"></i></div>
+        <div class="metric-content">
+            <span class="metric-label">Conversion Rate</span>
+            <span class="metric-value">{{ "%.1f"|format(conversion_rate|default(0)) }}%</span>
+            <span class="metric-trend down"><i class="fas fa-arrow-down"></i> 2%</span>
         </div>
     </div>
 
-    <div style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1rem; display: flex; align-items: center; gap: 0.75rem;">
-        <div style="width: 50px; height: 50px; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-            <i class="fas fa-dollar-sign" style="font-size: 1.2rem; color: white;"></i>
-        </div>
-        <div>
-            <span style="color: var(--text-muted); font-size: 0.75rem; display: block; margin-bottom: 0.25rem;">Revenue</span>
-            <span style="font-size: 1.5rem; font-weight: 600; color: var(--text-light);">MWK {{ "{:,.0f}".format(total_revenue|default(0)) }}</span>
-            <span style="color: #10b981; font-size: 0.7rem; margin-left: 0.5rem;">+25%</span>
+    <div class="metric-card" style="animation-delay: 0.2s;">
+        <div class="metric-icon"><i class="fas fa-dollar-sign"></i></div>
+        <div class="metric-content">
+            <span class="metric-label">Revenue</span>
+            <span class="metric-value">MWK {{ "{:,.0f}".format(total_revenue|default(0)) }}</span>
+            <span class="metric-trend up"><i class="fas fa-arrow-up"></i> 25%</span>
         </div>
     </div>
 </div>
 
 <!-- Charts Row -->
-<div class="charts-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
-    <div style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
-            <h3 style="margin: 0; font-size: 1rem; color: var(--text-light);">Views Over Time</h3>
+<div class="charts-grid">
+    <div class="chart-card">
+        <div class="chart-header">
+            <h3>Views Over Time</h3>
         </div>
-        <div class="chart-container" style="overflow-x: auto;">
-            <div class="chart-bars" style="display: flex; align-items: flex-end; gap: 0.5rem; padding: 1rem 0; min-width: 500px;">
+        <div class="chart-container">
+            <div class="chart-bars">
                 {% if sales_trend and sales_trend.labels %}
+                    {% set max_val = sales_trend.views_data|max|default(1) %}
                     {% for i in range(sales_trend.labels|length) %}
-                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
-                        <div style="width: 100%; height: {{ (sales_trend.views_data[i] / (sales_trend.views_data|max)) * 150 if sales_trend.views_data|max > 0 else 0 }}px; background: linear-gradient(to top, var(--accent-primary), var(--accent-secondary)); border-radius: 5px 5px 0 0;"></div>
-                        <span style="color: var(--text-muted); font-size: 0.7rem;">{{ sales_trend.labels[i][-5:] }}</span>
+                    <div class="chart-bar-wrapper">
+                        <div class="chart-bar" style="height: {{ (sales_trend.views_data[i] / max_val * 150) if max_val > 0 else 0 }}px;"></div>
+                        <span class="chart-label">{{ sales_trend.labels[i][-5:] }}</span>
                     </div>
                     {% endfor %}
                 {% else %}
-                    <div style="width: 100%; text-align: center; color: var(--text-muted); padding: 2rem;">
-                        <i class="fas fa-chart-line" style="font-size: 2rem; opacity: 0.3; margin-bottom: 0.5rem; display: block;"></i>
-                        <span>No data available</span>
+                    <div style="width: 100%; text-align: center; padding: 2rem; color: var(--text-muted);">
+                        <i class="fas fa-chart-line" style="font-size: 2rem; opacity: 0.3;"></i>
+                        <p style="margin-top: 0.5rem;">No data available</p>
                     </div>
                 {% endif %}
             </div>
         </div>
     </div>
 
-    <div style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-            <h3 style="margin: 0; font-size: 1rem; color: var(--text-light);">Messages Over Time</h3>
+    <div class="chart-card">
+        <div class="chart-header">
+            <h3>Messages Over Time</h3>
         </div>
-        <div class="chart-container" style="overflow-x: auto;">
-            <div class="chart-bars" style="display: flex; align-items: flex-end; gap: 0.5rem; padding: 1rem 0; min-width: 500px;">
+        <div class="chart-container">
+            <div class="chart-bars">
                 {% if messages_over_time %}
+                    {% set max_msgs = messages_over_time|map(attribute='count')|max|default(1) %}
                     {% for item in messages_over_time %}
-                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
-                        <div style="width: 100%; height: {{ (item.count / 10) * 150 }}px; background: linear-gradient(to top, #10b981, #34d399); border-radius: 5px 5px 0 0;"></div>
-                        <span style="color: var(--text-muted); font-size: 0.7rem;">{{ item.date[-5:] if item.date else 'N/A' }}</span>
+                    <div class="chart-bar-wrapper">
+                        <div class="chart-bar" style="height: {{ (item.count / max_msgs * 150) if max_msgs > 0 else 0 }}px; background: linear-gradient(to top, #10b981, #34d399);"></div>
+                        <span class="chart-label">{{ item.date[-5:] if item.date else 'N/A' }}</span>
                     </div>
                     {% endfor %}
                 {% else %}
-                    <div style="width: 100%; text-align: center; color: var(--text-muted); padding: 2rem;">
-                        <i class="fas fa-chart-bar" style="font-size: 2rem; opacity: 0.3; margin-bottom: 0.5rem; display: block;"></i>
-                        <span>No data available</span>
+                    <div style="width: 100%; text-align: center; padding: 2rem; color: var(--text-muted);">
+                        <i class="fas fa-chart-bar" style="font-size: 2rem; opacity: 0.3;"></i>
+                        <p style="margin-top: 0.5rem;">No data available</p>
                     </div>
                 {% endif %}
             </div>
@@ -202,50 +747,49 @@
 </div>
 
 <!-- Popular Products -->
-<div style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
-        <h3 style="margin: 0; font-size: 1rem; color: var(--text-light);">Top Performing Products</h3>
-        <select id="productSort" style="padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-light); font-size: 0.85rem;">
-            <option value="views">By Views</option>
-            <option value="messages">By Messages</option>
-            <option value="conversion">By Conversion Rate</option>
-        </select>
+<div class="products-table-wrapper">
+    <div class="table-header">
+        <h3>Top Performing Products</h3>
+        <div class="table-sort">
+            <select id="productSort">
+                <option value="views">By Views</option>
+                <option value="messages">By Messages</option>
+                <option value="conversion">By Conversion Rate</option>
+            </select>
+        </div>
     </div>
-
-    <div class="table-container" style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; min-width: 500px;">
+    <div class="table-container">
+        <table class="data-table">
             <thead>
-                <tr style="background: rgba(0,0,0,0.3);">
-                    <th style="padding: 0.75rem; text-align: left; color: var(--text-muted); font-weight: 500; font-size: 0.85rem;">Product</th>
-                    <th style="padding: 0.75rem; text-align: left; color: var(--text-muted); font-weight: 500; font-size: 0.85rem;">Views</th>
-                    <th style="padding: 0.75rem; text-align: left; color: var(--text-muted); font-weight: 500; font-size: 0.85rem;">Messages</th>
-                    <th style="padding: 0.75rem; text-align: left; color: var(--text-muted); font-weight: 500; font-size: 0.85rem;">Conversion</th>
-                    <th style="padding: 0.75rem; text-align: left; color: var(--text-muted); font-weight: 500; font-size: 0.85rem;">Status</th>
+                <tr>
+                    <th>Product</th>
+                    <th>Views</th>
+                    <th>Messages</th>
+                    <th>Conversion</th>
+                    <th>Status</th>
                 </tr>
             </thead>
             <tbody id="productsTableBody">
                 {% if popular_products %}
                     {% for product in popular_products %}
-                    <tr style="border-top: 1px solid var(--border-subtle);">
-                        <td style="padding: 0.75rem;">
-                            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                <img src="{{ product.thumbnail or url_for('static', filename='images/placeholder.jpg') }}"
-                                     alt="{{ product.title }}"
-                                     style="width: 35px; height: 35px; border-radius: 8px; object-fit: cover;">
-                                <span style="color: var(--text-light); font-size: 0.85rem;">{{ product.title[:30] }}{% if product.title|length > 30 %}...{% endif %}</span>
+                    <tr>
+                        <td>
+                            <div class="product-cell">
+                                <img src="{{ product.thumbnail or url_for('static', filename='images/placeholder.jpg') }}" class="product-thumb" onerror="this.src='{{ url_for('static', filename='images/placeholder.jpg') }}'">
+                                <span>{{ product.title[:30] }}{% if product.title|length > 30 %}...{% endif %}</span>
                             </div>
                         </td>
-                        <td style="padding: 0.75rem; color: var(--text-light); font-size: 0.85rem;">{{ product.views }}</td>
-                        <td style="padding: 0.75rem; color: var(--text-light); font-size: 0.85rem;">{{ product.messages_count|default(0) }}</td>
-                        <td style="padding: 0.75rem; color: var(--text-light); font-size: 0.85rem;">
+                        <td>{{ product.views }}</td>
+                        <td>{{ product.messages_count|default(0) }}</td>
+                        <td>
                             {% if product.views > 0 %}
                                 {{ "%.1f"|format((product.messages_count|default(0) / product.views * 100)) }}%
                             {% else %}
                                 0%
                             {% endif %}
                         </td>
-                        <td style="padding: 0.75rem;">
-                            <span class="status-badge {% if product.is_sold %}sold{% else %}available{% endif %}" style="font-size: 0.7rem;">
+                        <td>
+                            <span class="status-badge {% if product.is_sold %}sold{% else %}available{% endif %}">
                                 {{ 'Sold' if product.is_sold else 'Available' }}
                             </span>
                         </td>
@@ -253,9 +797,9 @@
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="5" style="padding: 2rem; text-align: center; color: var(--text-muted);">
-                            <i class="fas fa-box-open" style="font-size: 1.5rem; margin-bottom: 0.5rem; opacity: 0.5;"></i>
-                            <p style="font-size: 0.85rem;">No products found</p>
+                        <td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                            <i class="fas fa-box-open" style="font-size: 1.5rem; opacity: 0.5;"></i>
+                            <p>No products found</p>
                         </td>
                     </tr>
                 {% endif %}
@@ -265,108 +809,117 @@
 </div>
 
 <!-- Customer Insights -->
-<div class="insights-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
-    <div style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1rem;">
-        <h4 style="margin: 0 0 1rem; font-size: 0.9rem; color: var(--text-light);">Peak Hours</h4>
-        <div class="peak-hours" style="overflow-x: auto;">
-            <div class="peak-hours-bars" style="display: flex; justify-content: space-between; align-items: flex-end; gap: 0.5rem; min-width: 350px;">
-                <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
-                    <div style="width: 100%; height: 50px; background: linear-gradient(to top, var(--accent-primary), var(--accent-secondary)); border-radius: 5px 5px 0 0;"></div>
-                    <span style="color: var(--text-muted); font-size: 0.7rem;">9am</span>
+<div class="insights-grid">
+    <div class="insight-card">
+        <div class="insight-title">
+            <i class="fas fa-chart-line"></i>
+            Peak Hours
+        </div>
+        <div class="peak-hours-container">
+            <div class="peak-hours-bars">
+                <div class="peak-hour">
+                    <div class="peak-bar" style="height: 50px;"></div>
+                    <span class="peak-label">9am</span>
                 </div>
-                <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
-                    <div style="width: 100%; height: 70px; background: linear-gradient(to top, var(--accent-primary), var(--accent-secondary)); border-radius: 5px 5px 0 0;"></div>
-                    <span style="color: var(--text-muted); font-size: 0.7rem;">12pm</span>
+                <div class="peak-hour">
+                    <div class="peak-bar" style="height: 70px;"></div>
+                    <span class="peak-label">12pm</span>
                 </div>
-                <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
-                    <div style="width: 100%; height: 90px; background: linear-gradient(to top, var(--accent-primary), var(--accent-secondary)); border-radius: 5px 5px 0 0;"></div>
-                    <span style="color: var(--text-muted); font-size: 0.7rem;">3pm</span>
+                <div class="peak-hour">
+                    <div class="peak-bar" style="height: 90px;"></div>
+                    <span class="peak-label">3pm</span>
                 </div>
-                <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
-                    <div style="width: 100%; height: 80px; background: linear-gradient(to top, var(--accent-primary), var(--accent-secondary)); border-radius: 5px 5px 0 0;"></div>
-                    <span style="color: var(--text-muted); font-size: 0.7rem;">6pm</span>
+                <div class="peak-hour">
+                    <div class="peak-bar" style="height: 80px;"></div>
+                    <span class="peak-label">6pm</span>
                 </div>
-                <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
-                    <div style="width: 100%; height: 35px; background: linear-gradient(to top, var(--accent-primary), var(--accent-secondary)); border-radius: 5px 5px 0 0;"></div>
-                    <span style="color: var(--text-muted); font-size: 0.7rem;">9pm</span>
+                <div class="peak-hour">
+                    <div class="peak-bar" style="height: 35px;"></div>
+                    <span class="peak-label">9pm</span>
                 </div>
             </div>
         </div>
-        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 0.75rem; text-align: center;">Most active: 3 PM - 6 PM</p>
+        <p style="margin-top: 0.75rem; color: var(--text-muted); font-size: 0.7rem; text-align: center;">Most active: 3 PM - 6 PM</p>
     </div>
 
-    <div style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1rem;">
-        <h4 style="margin: 0 0 1rem; font-size: 0.9rem; color: var(--text-light);">Customer Locations</h4>
-        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-            <div class="location-item" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                <span style="color: var(--text-light); font-size: 0.85rem; width: 70px;">Lilongwe</span>
-                <div class="location-bar" style="flex: 1; min-width: 100px;">
-                    <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
-                        <div style="width: 45%; height: 100%; background: var(--accent-primary); border-radius: 3px;"></div>
+    <div class="insight-card">
+        <div class="insight-title">
+            <i class="fas fa-map-marker-alt"></i>
+            Customer Locations
+        </div>
+        <div>
+            <div class="location-item">
+                <span class="location-name">Lilongwe</span>
+                <div class="location-bar-container">
+                    <div class="location-bar-bg">
+                        <div class="location-bar-fill" style="width: 45%;"></div>
                     </div>
                 </div>
-                <span style="color: var(--text-muted); font-size: 0.75rem; width: 35px;">45%</span>
+                <span class="location-percent">45%</span>
             </div>
-            <div class="location-item" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                <span style="color: var(--text-light); font-size: 0.85rem; width: 70px;">Blantyre</span>
-                <div class="location-bar" style="flex: 1; min-width: 100px;">
-                    <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
-                        <div style="width: 30%; height: 100%; background: var(--accent-primary); border-radius: 3px;"></div>
+            <div class="location-item">
+                <span class="location-name">Blantyre</span>
+                <div class="location-bar-container">
+                    <div class="location-bar-bg">
+                        <div class="location-bar-fill" style="width: 30%;"></div>
                     </div>
                 </div>
-                <span style="color: var(--text-muted); font-size: 0.75rem; width: 35px;">30%</span>
+                <span class="location-percent">30%</span>
             </div>
-            <div class="location-item" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                <span style="color: var(--text-light); font-size: 0.85rem; width: 70px;">Mzuzu</span>
-                <div class="location-bar" style="flex: 1; min-width: 100px;">
-                    <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
-                        <div style="width: 15%; height: 100%; background: var(--accent-primary); border-radius: 3px;"></div>
+            <div class="location-item">
+                <span class="location-name">Mzuzu</span>
+                <div class="location-bar-container">
+                    <div class="location-bar-bg">
+                        <div class="location-bar-fill" style="width: 15%;"></div>
                     </div>
                 </div>
-                <span style="color: var(--text-muted); font-size: 0.75rem; width: 35px;">15%</span>
+                <span class="location-percent">15%</span>
             </div>
-            <div class="location-item" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                <span style="color: var(--text-light); font-size: 0.85rem; width: 70px;">Other</span>
-                <div class="location-bar" style="flex: 1; min-width: 100px;">
-                    <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
-                        <div style="width: 10%; height: 100%; background: var(--accent-primary); border-radius: 3px;"></div>
+            <div class="location-item">
+                <span class="location-name">Other</span>
+                <div class="location-bar-container">
+                    <div class="location-bar-bg">
+                        <div class="location-bar-fill" style="width: 10%;"></div>
                     </div>
                 </div>
-                <span style="color: var(--text-muted); font-size: 0.75rem; width: 35px;">10%</span>
+                <span class="location-percent">10%</span>
             </div>
         </div>
     </div>
 
-    <div style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1rem;">
-        <h4 style="margin: 0 0 1rem; font-size: 0.9rem; color: var(--text-light);">Device Breakdown</h4>
-        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-            <div class="device-item" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                <i class="fas fa-mobile-alt" style="width: 25px; color: var(--accent-primary); font-size: 1rem;"></i>
-                <span style="flex: 1; color: var(--text-light); font-size: 0.85rem;">Mobile</span>
-                <span style="color: var(--text-muted); font-size: 0.75rem;">65%</span>
-                <div class="device-bar" style="width: 80px;">
-                    <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
-                        <div style="width: 65%; height: 100%; background: var(--accent-primary); border-radius: 3px;"></div>
+    <div class="insight-card">
+        <div class="insight-title">
+            <i class="fas fa-mobile-alt"></i>
+            Device Breakdown
+        </div>
+        <div>
+            <div class="device-item">
+                <i class="fas fa-mobile-alt device-icon"></i>
+                <span class="device-name">Mobile</span>
+                <span class="device-percent">65%</span>
+                <div class="device-bar">
+                    <div class="location-bar-bg">
+                        <div class="location-bar-fill" style="width: 65%;"></div>
                     </div>
                 </div>
             </div>
-            <div class="device-item" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                <i class="fas fa-tablet-alt" style="width: 25px; color: var(--accent-primary); font-size: 1rem;"></i>
-                <span style="flex: 1; color: var(--text-light); font-size: 0.85rem;">Tablet</span>
-                <span style="color: var(--text-muted); font-size: 0.75rem;">15%</span>
-                <div class="device-bar" style="width: 80px;">
-                    <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
-                        <div style="width: 15%; height: 100%; background: var(--accent-primary); border-radius: 3px;"></div>
+            <div class="device-item">
+                <i class="fas fa-tablet-alt device-icon"></i>
+                <span class="device-name">Tablet</span>
+                <span class="device-percent">15%</span>
+                <div class="device-bar">
+                    <div class="location-bar-bg">
+                        <div class="location-bar-fill" style="width: 15%;"></div>
                     </div>
                 </div>
             </div>
-            <div class="device-item" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                <i class="fas fa-desktop" style="width: 25px; color: var(--accent-primary); font-size: 1rem;"></i>
-                <span style="flex: 1; color: var(--text-light); font-size: 0.85rem;">Desktop</span>
-                <span style="color: var(--text-muted); font-size: 0.75rem;">20%</span>
-                <div class="device-bar" style="width: 80px;">
-                    <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
-                        <div style="width: 20%; height: 100%; background: var(--accent-primary); border-radius: 3px;"></div>
+            <div class="device-item">
+                <i class="fas fa-desktop device-icon"></i>
+                <span class="device-name">Desktop</span>
+                <span class="device-percent">20%</span>
+                <div class="device-bar">
+                    <div class="location-bar-bg">
+                        <div class="location-bar-fill" style="width: 20%;"></div>
                     </div>
                 </div>
             </div>
@@ -384,73 +937,93 @@
 }
 
 .status-badge.available {
-    background: rgba(16, 185, 129, 0.2);
+    background: rgba(16,185,129,0.2);
     color: #10b981;
 }
 
 .status-badge.sold {
-    background: rgba(239, 68, 68, 0.2);
+    background: rgba(239,68,68,0.2);
     color: #ef4444;
-}
-
-.range-btn.active {
-    background: var(--accent-primary) !important;
-    color: white !important;
-    border-color: var(--accent-primary) !important;
-}
-
-.range-btn:hover {
-    background: rgba(255, 255, 255, 0.1) !important;
-}
-
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px var(--accent-glow);
 }
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Date range buttons
-    document.querySelectorAll('.range-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            const days = this.dataset.days;
-            // Here you would fetch new data based on days
-        });
-    });
+// Show/hide loading spinner
+function showLoading() {
+    document.getElementById('loadingOverlay').classList.add('active');
+}
 
-    // Custom date range
-    document.getElementById('applyCustomRange')?.addEventListener('click', function() {
-        const start = document.getElementById('startDate').value;
-        const end = document.getElementById('endDate').value;
-        if (start && end) {
-            alert(`Fetching data from ${start} to ${end}`);
+function hideLoading() {
+    document.getElementById('loadingOverlay').classList.remove('active');
+}
+
+// Date range buttons
+document.querySelectorAll('.range-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        showLoading();
+        const days = this.dataset.days;
+        setTimeout(() => {
+            window.location.href = `/dashboard/analytics?days=${days}`;
+        }, 300);
+    });
+});
+
+// Custom date range
+document.getElementById('applyCustomRange')?.addEventListener('click', function() {
+    const start = document.getElementById('startDate').value;
+    const end = document.getElementById('endDate').value;
+    if (start && end) {
+        showLoading();
+        setTimeout(() => {
+            window.location.href = `/dashboard/analytics?start=${start}&end=${end}`;
+        }, 300);
+    }
+});
+
+// Product sort
+document.getElementById('productSort')?.addEventListener('change', function() {
+    const sortBy = this.value;
+    const tbody = document.getElementById('productsTableBody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+
+    if (rows.length === 0 || (rows.length === 1 && rows[0].cells.length === 1)) return;
+
+    rows.sort((a, b) => {
+        let aVal, bVal;
+        if (sortBy === 'views') {
+            aVal = parseInt(a.cells[1]?.textContent || 0);
+            bVal = parseInt(b.cells[1]?.textContent || 0);
+        } else if (sortBy === 'messages') {
+            aVal = parseInt(a.cells[2]?.textContent || 0);
+            bVal = parseInt(b.cells[2]?.textContent || 0);
+        } else {
+            aVal = parseFloat(a.cells[3]?.textContent || 0);
+            bVal = parseFloat(b.cells[3]?.textContent || 0);
         }
+        return bVal - aVal;
     });
 
-    // Product sort
-    document.getElementById('productSort')?.addEventListener('change', function() {
-        const sortBy = this.value;
-        const tbody = document.getElementById('productsTableBody');
-        const rows = Array.from(tbody.querySelectorAll('tr'));
-        if (rows.length === 0) return;
-        rows.sort((a, b) => {
-            let aVal, bVal;
-            if (sortBy === 'views') {
-                aVal = parseInt(a.cells[1]?.textContent || 0);
-                bVal = parseInt(b.cells[1]?.textContent || 0);
-            } else if (sortBy === 'messages') {
-                aVal = parseInt(a.cells[2]?.textContent || 0);
-                bVal = parseInt(b.cells[2]?.textContent || 0);
-            } else {
-                aVal = parseFloat(a.cells[3]?.textContent || 0);
-                bVal = parseFloat(b.cells[3]?.textContent || 0);
-            }
-            return bVal - aVal;
-        });
-        rows.forEach(row => tbody.appendChild(row));
+    rows.forEach(row => tbody.appendChild(row));
+});
+
+// Hide loading overlay after page load
+window.addEventListener('load', function() {
+    setTimeout(() => {
+        hideLoading();
+    }, 500);
+});
+
+// Animate chart bars on load
+document.addEventListener('DOMContentLoaded', function() {
+    const bars = document.querySelectorAll('.chart-bar');
+    bars.forEach(bar => {
+        const height = bar.style.height;
+        bar.style.height = '0';
+        setTimeout(() => {
+            bar.style.height = height;
+        }, 100);
     });
 });
 </script>
