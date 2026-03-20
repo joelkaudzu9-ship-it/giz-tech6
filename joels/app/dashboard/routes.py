@@ -451,24 +451,6 @@ def settings():
                            form=form)
 
 
-@bp.route('/setup-owner')
-def setup_owner():
-    """One-time setup to create owner - REMOVE AFTER RUNNING"""
-    from app.models import Owner
-
-    # Check if owner exists
-    if Owner.query.filter_by(username='joelk').first():
-        return "Owner already exists!"
-
-    # Create owner
-    owner = Owner(username='joelk', email='joelk@example.com')
-    owner.password = 'joelkzu.k'
-    db.session.add(owner)
-    db.session.commit()
-
-    return "Owner created! Username: joelk, Password: joelkzu.k"
-
-
 # Export data endpoint
 @bp.route('/export-data')
 @owner_required

@@ -4,169 +4,248 @@
 {% block dashboard_subtitle %}Detailed insights and performance metrics{% endblock %}
 
 {% block dashboard_content %}
+<style>
+/* Responsive Fixes */
+@media (max-width: 768px) {
+    .date-range-container {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+
+    .date-buttons {
+        justify-content: center !important;
+        width: 100% !important;
+    }
+
+    .custom-date-range {
+        flex-direction: column !important;
+        width: 100% !important;
+        gap: 0.75rem !important;
+    }
+
+    .custom-date-range input {
+        width: 100% !important;
+    }
+
+    .custom-date-range button {
+        width: 100% !important;
+    }
+
+    .metrics-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+    }
+
+    .charts-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+    }
+
+    .insights-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+    }
+
+    .chart-container {
+        overflow-x: auto !important;
+    }
+
+    .chart-bars {
+        min-width: 600px !important;
+    }
+
+    .table-container {
+        overflow-x: auto !important;
+    }
+
+    .location-item {
+        flex-wrap: wrap !important;
+        gap: 0.5rem !important;
+    }
+
+    .location-bar {
+        width: 100% !important;
+        margin: 0 !important;
+    }
+
+    .device-item {
+        flex-wrap: wrap !important;
+    }
+
+    .device-bar {
+        width: 100% !important;
+        margin-top: 0.5rem !important;
+    }
+
+    .peak-hours {
+        overflow-x: auto !important;
+    }
+
+    .peak-hours-bars {
+        min-width: 400px !important;
+    }
+}
+</style>
+
 <!-- Date Range Selector -->
-<div style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
-    <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between;">
-        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-            <button class="range-btn active" data-days="7" style="padding: 0.5rem 1rem; background: var(--accent-primary); color: white; border: none; border-radius: 50px; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease;">Last 7 days</button>
-            <button class="range-btn" data-days="30" style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.05); color: var(--text-light); border: 1px solid var(--border-subtle); border-radius: 50px; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease;">Last 30 days</button>
-            <button class="range-btn" data-days="90" style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.05); color: var(--text-light); border: 1px solid var(--border-subtle); border-radius: 50px; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease;">Last 90 days</button>
-            <button class="range-btn" data-days="365" style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.05); color: var(--text-light); border: 1px solid var(--border-subtle); border-radius: 50px; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease;">Last year</button>
+<div style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem;">
+    <div class="date-range-container" style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between;">
+        <div class="date-buttons" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button class="range-btn active" data-days="7" style="padding: 0.5rem 1rem; background: var(--accent-primary); color: white; border: none; border-radius: 50px; font-size: 0.85rem; cursor: pointer;">7 days</button>
+            <button class="range-btn" data-days="30" style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.05); color: var(--text-light); border: 1px solid var(--border-subtle); border-radius: 50px; font-size: 0.85rem; cursor: pointer;">30 days</button>
+            <button class="range-btn" data-days="90" style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.05); color: var(--text-light); border: 1px solid var(--border-subtle); border-radius: 50px; font-size: 0.85rem; cursor: pointer;">90 days</button>
+            <button class="range-btn" data-days="365" style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.05); color: var(--text-light); border: 1px solid var(--border-subtle); border-radius: 50px; font-size: 0.85rem; cursor: pointer;">Year</button>
         </div>
-        <div style="display: flex; gap: 0.5rem; align-items: center;">
-            <input type="date" id="startDate" style="padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-light);">
+        <div class="custom-date-range" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+            <input type="date" id="startDate" style="padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-light); font-size: 0.85rem;">
             <span style="color: var(--text-muted);">to</span>
-            <input type="date" id="endDate" style="padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-light);">
-            <button id="applyCustomRange" class="btn btn-primary" style="padding: 0.5rem 1rem; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); border: none; border-radius: 8px; color: white; cursor: pointer;">Apply</button>
+            <input type="date" id="endDate" style="padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-light); font-size: 0.85rem;">
+            <button id="applyCustomRange" class="btn btn-primary" style="padding: 0.5rem 1rem; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); border: none; border-radius: 8px; color: white; cursor: pointer; font-size: 0.85rem;">Apply</button>
         </div>
     </div>
 </div>
 
 <!-- Key Metrics -->
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-    <div style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1.5rem; display: flex; align-items: center; gap: 1rem;">
-        <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-            <i class="fas fa-eye" style="font-size: 1.5rem; color: white;"></i>
+<div class="metrics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+    <div style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1rem; display: flex; align-items: center; gap: 0.75rem;">
+        <div style="width: 50px; height: 50px; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-eye" style="font-size: 1.2rem; color: white;"></i>
         </div>
         <div>
-            <span style="color: var(--text-muted); font-size: 0.9rem; display: block; margin-bottom: 0.25rem;">Total Views</span>
-            <span style="font-size: 1.75rem; font-weight: 600; color: var(--text-light);">{{ "{:,.0f}".format(total_views|default(0)) }}</span>
-            <span style="color: #10b981; font-size: 0.85rem; margin-left: 0.5rem;">+12%</span>
+            <span style="color: var(--text-muted); font-size: 0.75rem; display: block; margin-bottom: 0.25rem;">Total Views</span>
+            <span style="font-size: 1.5rem; font-weight: 600; color: var(--text-light);">{{ "{:,.0f}".format(total_views|default(0)) }}</span>
+            <span style="color: #10b981; font-size: 0.7rem; margin-left: 0.5rem;">+12%</span>
         </div>
     </div>
 
-    <div style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1.5rem; display: flex; align-items: center; gap: 1rem;">
-        <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-            <i class="fas fa-envelope" style="font-size: 1.5rem; color: white;"></i>
+    <div style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1rem; display: flex; align-items: center; gap: 0.75rem;">
+        <div style="width: 50px; height: 50px; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-envelope" style="font-size: 1.2rem; color: white;"></i>
         </div>
         <div>
-            <span style="color: var(--text-muted); font-size: 0.9rem; display: block; margin-bottom: 0.25rem;">Messages</span>
-            <span style="font-size: 1.75rem; font-weight: 600; color: var(--text-light);">{{ "{:,.0f}".format(total_messages|default(0)) }}</span>
-            <span style="color: #10b981; font-size: 0.85rem; margin-left: 0.5rem;">+5%</span>
+            <span style="color: var(--text-muted); font-size: 0.75rem; display: block; margin-bottom: 0.25rem;">Messages</span>
+            <span style="font-size: 1.5rem; font-weight: 600; color: var(--text-light);">{{ "{:,.0f}".format(total_messages|default(0)) }}</span>
+            <span style="color: #10b981; font-size: 0.7rem; margin-left: 0.5rem;">+5%</span>
         </div>
     </div>
 
-    <div style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1.5rem; display: flex; align-items: center; gap: 1rem;">
-        <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-            <i class="fas fa-chart-line" style="font-size: 1.5rem; color: white;"></i>
+    <div style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1rem; display: flex; align-items: center; gap: 0.75rem;">
+        <div style="width: 50px; height: 50px; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-chart-line" style="font-size: 1.2rem; color: white;"></i>
         </div>
         <div>
-            <span style="color: var(--text-muted); font-size: 0.9rem; display: block; margin-bottom: 0.25rem;">Conversion Rate</span>
-            <span style="font-size: 1.75rem; font-weight: 600; color: var(--text-light);">{{ "%.1f"|format(conversion_rate|default(0)) }}%</span>
-            <span style="color: {% if conversion_rate > 5 %}#10b981{% else %}#ef4444{% endif %}; font-size: 0.85rem; margin-left: 0.5rem;">
-                {% if conversion_rate > 5 %}+{% endif %}{{ "%.1f"|format((conversion_rate|default(0)) - 5) }}%
-            </span>
+            <span style="color: var(--text-muted); font-size: 0.75rem; display: block; margin-bottom: 0.25rem;">Conversion Rate</span>
+            <span style="font-size: 1.5rem; font-weight: 600; color: var(--text-light);">{{ "%.1f"|format(conversion_rate|default(0)) }}%</span>
+            <span style="color: #ef4444; font-size: 0.7rem; margin-left: 0.5rem;">-2%</span>
         </div>
     </div>
 
-    <div style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1.5rem; display: flex; align-items: center; gap: 1rem;">
-        <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-            <i class="fas fa-dollar-sign" style="font-size: 1.5rem; color: white;"></i>
+    <div style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1rem; display: flex; align-items: center; gap: 0.75rem;">
+        <div style="width: 50px; height: 50px; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-dollar-sign" style="font-size: 1.2rem; color: white;"></i>
         </div>
         <div>
-            <span style="color: var(--text-muted); font-size: 0.9rem; display: block; margin-bottom: 0.25rem;">Revenue</span>
-            <span style="font-size: 1.75rem; font-weight: 600; color: var(--text-light);">MWK {{ "{:,.0f}".format(total_revenue|default(0)) }}</span>
-            <span style="color: #10b981; font-size: 0.85rem; margin-left: 0.5rem;">+25%</span>
+            <span style="color: var(--text-muted); font-size: 0.75rem; display: block; margin-bottom: 0.25rem;">Revenue</span>
+            <span style="font-size: 1.5rem; font-weight: 600; color: var(--text-light);">MWK {{ "{:,.0f}".format(total_revenue|default(0)) }}</span>
+            <span style="color: #10b981; font-size: 0.7rem; margin-left: 0.5rem;">+25%</span>
         </div>
     </div>
 </div>
 
 <!-- Charts Row -->
-<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
-    <div style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1.5rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-            <h3 style="margin: 0; font-size: 1.1rem; color: var(--text-light);">Views Over Time</h3>
-            <div style="display: flex; gap: 1rem;">
-                <span style="display: flex; align-items: center; gap: 0.5rem;">
-                    <span style="width: 12px; height: 12px; background: var(--accent-primary); border-radius: 3px;"></span>
-                    <span style="color: var(--text-muted); font-size: 0.9rem;">Views</span>
-                </span>
-            </div>
+<div class="charts-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+    <div style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+            <h3 style="margin: 0; font-size: 1rem; color: var(--text-light);">Views Over Time</h3>
         </div>
-        <div style="height: 300px; display: flex; align-items: flex-end; gap: 0.5rem; padding: 1rem 0;">
-            {% if sales_trend and sales_trend.labels %}
-                {% for i in range(sales_trend.labels|length) %}
-                <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
-                    <div style="width: 100%; height: {{ (sales_trend.views_data[i] / (sales_trend.views_data|max)) * 200 if sales_trend.views_data|max > 0 else 0 }}px; background: linear-gradient(to top, var(--accent-primary), var(--accent-secondary)); border-radius: 5px 5px 0 0; transition: height 0.3s ease;"></div>
-                    <span style="color: var(--text-muted); font-size: 0.8rem; transform: rotate(-45deg);">{{ sales_trend.labels[i][-5:] }}</span>
-                </div>
-                {% endfor %}
-            {% else %}
-                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text-muted);">
-                    <i class="fas fa-chart-line" style="font-size: 3rem; opacity: 0.3; margin-right: 1rem;"></i>
-                    <span>No data available</span>
-                </div>
-            {% endif %}
+        <div class="chart-container" style="overflow-x: auto;">
+            <div class="chart-bars" style="display: flex; align-items: flex-end; gap: 0.5rem; padding: 1rem 0; min-width: 500px;">
+                {% if sales_trend and sales_trend.labels %}
+                    {% for i in range(sales_trend.labels|length) %}
+                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                        <div style="width: 100%; height: {{ (sales_trend.views_data[i] / (sales_trend.views_data|max)) * 150 if sales_trend.views_data|max > 0 else 0 }}px; background: linear-gradient(to top, var(--accent-primary), var(--accent-secondary)); border-radius: 5px 5px 0 0;"></div>
+                        <span style="color: var(--text-muted); font-size: 0.7rem;">{{ sales_trend.labels[i][-5:] }}</span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div style="width: 100%; text-align: center; color: var(--text-muted); padding: 2rem;">
+                        <i class="fas fa-chart-line" style="font-size: 2rem; opacity: 0.3; margin-bottom: 0.5rem; display: block;"></i>
+                        <span>No data available</span>
+                    </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 
-    <div style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1.5rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-            <h3 style="margin: 0; font-size: 1.1rem; color: var(--text-light);">Messages Over Time</h3>
+    <div style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="margin: 0; font-size: 1rem; color: var(--text-light);">Messages Over Time</h3>
         </div>
-        <div style="height: 300px; display: flex; align-items: flex-end; gap: 0.5rem; padding: 1rem 0;">
-            {% if messages_over_time %}
-                {% for item in messages_over_time %}
-                <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
-                    <div style="width: 100%; height: {{ (item.count / 10) * 200 }}px; background: linear-gradient(to top, #10b981, #34d399); border-radius: 5px 5px 0 0; transition: height 0.3s ease;"></div>
-                    <span style="color: var(--text-muted); font-size: 0.8rem; transform: rotate(-45deg);">{{ item.date[-5:] if item.date else 'N/A' }}</span>
-                </div>
-                {% endfor %}
-            {% else %}
-                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text-muted);">
-                    <i class="fas fa-chart-bar" style="font-size: 3rem; opacity: 0.3; margin-right: 1rem;"></i>
-                    <span>No data available</span>
-                </div>
-            {% endif %}
+        <div class="chart-container" style="overflow-x: auto;">
+            <div class="chart-bars" style="display: flex; align-items: flex-end; gap: 0.5rem; padding: 1rem 0; min-width: 500px;">
+                {% if messages_over_time %}
+                    {% for item in messages_over_time %}
+                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                        <div style="width: 100%; height: {{ (item.count / 10) * 150 }}px; background: linear-gradient(to top, #10b981, #34d399); border-radius: 5px 5px 0 0;"></div>
+                        <span style="color: var(--text-muted); font-size: 0.7rem;">{{ item.date[-5:] if item.date else 'N/A' }}</span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div style="width: 100%; text-align: center; color: var(--text-muted); padding: 2rem;">
+                        <i class="fas fa-chart-bar" style="font-size: 2rem; opacity: 0.3; margin-bottom: 0.5rem; display: block;"></i>
+                        <span>No data available</span>
+                    </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>
 
 <!-- Popular Products -->
-<div style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-        <h3 style="margin: 0; font-size: 1.1rem; color: var(--text-light);">Top Performing Products</h3>
-        <select id="productSort" style="padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-light);">
+<div style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+        <h3 style="margin: 0; font-size: 1rem; color: var(--text-light);">Top Performing Products</h3>
+        <select id="productSort" style="padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-light); font-size: 0.85rem;">
             <option value="views">By Views</option>
             <option value="messages">By Messages</option>
             <option value="conversion">By Conversion Rate</option>
         </select>
     </div>
 
-    <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse;">
+    <div class="table-container" style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; min-width: 500px;">
             <thead>
                 <tr style="background: rgba(0,0,0,0.3);">
-                    <th style="padding: 1rem; text-align: left; color: var(--text-muted); font-weight: 500;">Product</th>
-                    <th style="padding: 1rem; text-align: left; color: var(--text-muted); font-weight: 500;">Views</th>
-                    <th style="padding: 1rem; text-align: left; color: var(--text-muted); font-weight: 500;">Messages</th>
-                    <th style="padding: 1rem; text-align: left; color: var(--text-muted); font-weight: 500;">Conversion</th>
-                    <th style="padding: 1rem; text-align: left; color: var(--text-muted); font-weight: 500;">Status</th>
+                    <th style="padding: 0.75rem; text-align: left; color: var(--text-muted); font-weight: 500; font-size: 0.85rem;">Product</th>
+                    <th style="padding: 0.75rem; text-align: left; color: var(--text-muted); font-weight: 500; font-size: 0.85rem;">Views</th>
+                    <th style="padding: 0.75rem; text-align: left; color: var(--text-muted); font-weight: 500; font-size: 0.85rem;">Messages</th>
+                    <th style="padding: 0.75rem; text-align: left; color: var(--text-muted); font-weight: 500; font-size: 0.85rem;">Conversion</th>
+                    <th style="padding: 0.75rem; text-align: left; color: var(--text-muted); font-weight: 500; font-size: 0.85rem;">Status</th>
                 </tr>
             </thead>
             <tbody id="productsTableBody">
                 {% if popular_products %}
                     {% for product in popular_products %}
                     <tr style="border-top: 1px solid var(--border-subtle);">
-                        <td style="padding: 1rem;">
-                            <div style="display: flex; align-items: center; gap: 1rem;">
+                        <td style="padding: 0.75rem;">
+                            <div style="display: flex; align-items: center; gap: 0.75rem;">
                                 <img src="{{ product.thumbnail or url_for('static', filename='images/placeholder.jpg') }}"
                                      alt="{{ product.title }}"
-                                     style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover;">
-                                <span style="color: var(--text-light);">{{ product.title }}</span>
+                                     style="width: 35px; height: 35px; border-radius: 8px; object-fit: cover;">
+                                <span style="color: var(--text-light); font-size: 0.85rem;">{{ product.title[:30] }}{% if product.title|length > 30 %}...{% endif %}</span>
                             </div>
                         </td>
-                        <td style="padding: 1rem; color: var(--text-light);">{{ product.views }}</td>
-                        <td style="padding: 1rem; color: var(--text-light);">{{ product.messages_count|default(0) }}</td>
-                        <td style="padding: 1rem; color: var(--text-light);">
+                        <td style="padding: 0.75rem; color: var(--text-light); font-size: 0.85rem;">{{ product.views }}</td>
+                        <td style="padding: 0.75rem; color: var(--text-light); font-size: 0.85rem;">{{ product.messages_count|default(0) }}</td>
+                        <td style="padding: 0.75rem; color: var(--text-light); font-size: 0.85rem;">
                             {% if product.views > 0 %}
                                 {{ "%.1f"|format((product.messages_count|default(0) / product.views * 100)) }}%
                             {% else %}
                                 0%
                             {% endif %}
                         </td>
-                        <td style="padding: 1rem;">
-                            <span class="status-badge {% if product.is_sold %}sold{% else %}available{% endif %}">
+                        <td style="padding: 0.75rem;">
+                            <span class="status-badge {% if product.is_sold %}sold{% else %}available{% endif %}" style="font-size: 0.7rem;">
                                 {{ 'Sold' if product.is_sold else 'Available' }}
                             </span>
                         </td>
@@ -174,9 +253,9 @@
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="5" style="padding: 3rem; text-align: center; color: var(--text-muted);">
-                            <i class="fas fa-box-open" style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;"></i>
-                            <p>No products found</p>
+                        <td colspan="5" style="padding: 2rem; text-align: center; color: var(--text-muted);">
+                            <i class="fas fa-box-open" style="font-size: 1.5rem; margin-bottom: 0.5rem; opacity: 0.5;"></i>
+                            <p style="font-size: 0.85rem;">No products found</p>
                         </td>
                     </tr>
                 {% endif %}
@@ -186,101 +265,109 @@
 </div>
 
 <!-- Customer Insights -->
-<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
-    <div style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1.5rem;">
-        <h4 style="margin: 0 0 1.5rem; font-size: 1rem; color: var(--text-light);">Peak Hours</h4>
-        <div style="display: flex; justify-content: space-between; align-items: flex-end; height: 150px; gap: 0.5rem;">
-            <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
-                <div style="width: 100%; height: 60px; background: linear-gradient(to top, var(--accent-primary), var(--accent-secondary)); border-radius: 5px 5px 0 0;"></div>
-                <span style="color: var(--text-muted); font-size: 0.8rem;">9am</span>
-            </div>
-            <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
-                <div style="width: 100%; height: 80px; background: linear-gradient(to top, var(--accent-primary), var(--accent-secondary)); border-radius: 5px 5px 0 0;"></div>
-                <span style="color: var(--text-muted); font-size: 0.8rem;">12pm</span>
-            </div>
-            <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
-                <div style="width: 100%; height: 100px; background: linear-gradient(to top, var(--accent-primary), var(--accent-secondary)); border-radius: 5px 5px 0 0;"></div>
-                <span style="color: var(--text-muted); font-size: 0.8rem;">3pm</span>
-            </div>
-            <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
-                <div style="width: 100%; height: 90px; background: linear-gradient(to top, var(--accent-primary), var(--accent-secondary)); border-radius: 5px 5px 0 0;"></div>
-                <span style="color: var(--text-muted); font-size: 0.8rem;">6pm</span>
-            </div>
-            <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
-                <div style="width: 100%; height: 40px; background: linear-gradient(to top, var(--accent-primary), var(--accent-secondary)); border-radius: 5px 5px 0 0;"></div>
-                <span style="color: var(--text-muted); font-size: 0.8rem;">9pm</span>
+<div class="insights-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+    <div style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1rem;">
+        <h4 style="margin: 0 0 1rem; font-size: 0.9rem; color: var(--text-light);">Peak Hours</h4>
+        <div class="peak-hours" style="overflow-x: auto;">
+            <div class="peak-hours-bars" style="display: flex; justify-content: space-between; align-items: flex-end; gap: 0.5rem; min-width: 350px;">
+                <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                    <div style="width: 100%; height: 50px; background: linear-gradient(to top, var(--accent-primary), var(--accent-secondary)); border-radius: 5px 5px 0 0;"></div>
+                    <span style="color: var(--text-muted); font-size: 0.7rem;">9am</span>
+                </div>
+                <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                    <div style="width: 100%; height: 70px; background: linear-gradient(to top, var(--accent-primary), var(--accent-secondary)); border-radius: 5px 5px 0 0;"></div>
+                    <span style="color: var(--text-muted); font-size: 0.7rem;">12pm</span>
+                </div>
+                <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                    <div style="width: 100%; height: 90px; background: linear-gradient(to top, var(--accent-primary), var(--accent-secondary)); border-radius: 5px 5px 0 0;"></div>
+                    <span style="color: var(--text-muted); font-size: 0.7rem;">3pm</span>
+                </div>
+                <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                    <div style="width: 100%; height: 80px; background: linear-gradient(to top, var(--accent-primary), var(--accent-secondary)); border-radius: 5px 5px 0 0;"></div>
+                    <span style="color: var(--text-muted); font-size: 0.7rem;">6pm</span>
+                </div>
+                <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                    <div style="width: 100%; height: 35px; background: linear-gradient(to top, var(--accent-primary), var(--accent-secondary)); border-radius: 5px 5px 0 0;"></div>
+                    <span style="color: var(--text-muted); font-size: 0.7rem;">9pm</span>
+                </div>
             </div>
         </div>
-        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 0.9rem; text-align: center;">Most active: 3 PM - 6 PM</p>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 0.75rem; text-align: center;">Most active: 3 PM - 6 PM</p>
     </div>
 
-    <div style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1.5rem;">
-        <h4 style="margin: 0 0 1.5rem; font-size: 1rem; color: var(--text-light);">Customer Locations</h4>
-        <div style="display: flex; flex-direction: column; gap: 1rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="color: var(--text-light);">Lilongwe</span>
-                <div style="flex: 1; margin: 0 1rem;">
-                    <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
-                        <div style="width: 45%; height: 100%; background: var(--accent-primary); border-radius: 4px;"></div>
+    <div style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1rem;">
+        <h4 style="margin: 0 0 1rem; font-size: 0.9rem; color: var(--text-light);">Customer Locations</h4>
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <div class="location-item" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                <span style="color: var(--text-light); font-size: 0.85rem; width: 70px;">Lilongwe</span>
+                <div class="location-bar" style="flex: 1; min-width: 100px;">
+                    <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                        <div style="width: 45%; height: 100%; background: var(--accent-primary); border-radius: 3px;"></div>
                     </div>
                 </div>
-                <span style="color: var(--text-muted);">45%</span>
+                <span style="color: var(--text-muted); font-size: 0.75rem; width: 35px;">45%</span>
             </div>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="color: var(--text-light);">Blantyre</span>
-                <div style="flex: 1; margin: 0 1rem;">
-                    <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
-                        <div style="width: 30%; height: 100%; background: var(--accent-primary); border-radius: 4px;"></div>
+            <div class="location-item" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                <span style="color: var(--text-light); font-size: 0.85rem; width: 70px;">Blantyre</span>
+                <div class="location-bar" style="flex: 1; min-width: 100px;">
+                    <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                        <div style="width: 30%; height: 100%; background: var(--accent-primary); border-radius: 3px;"></div>
                     </div>
                 </div>
-                <span style="color: var(--text-muted);">30%</span>
+                <span style="color: var(--text-muted); font-size: 0.75rem; width: 35px;">30%</span>
             </div>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="color: var(--text-light);">Mzuzu</span>
-                <div style="flex: 1; margin: 0 1rem;">
-                    <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
-                        <div style="width: 15%; height: 100%; background: var(--accent-primary); border-radius: 4px;"></div>
+            <div class="location-item" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                <span style="color: var(--text-light); font-size: 0.85rem; width: 70px;">Mzuzu</span>
+                <div class="location-bar" style="flex: 1; min-width: 100px;">
+                    <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                        <div style="width: 15%; height: 100%; background: var(--accent-primary); border-radius: 3px;"></div>
                     </div>
                 </div>
-                <span style="color: var(--text-muted);">15%</span>
+                <span style="color: var(--text-muted); font-size: 0.75rem; width: 35px;">15%</span>
             </div>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="color: var(--text-light);">Other</span>
-                <div style="flex: 1; margin: 0 1rem;">
-                    <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
-                        <div style="width: 10%; height: 100%; background: var(--accent-primary); border-radius: 4px;"></div>
+            <div class="location-item" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                <span style="color: var(--text-light); font-size: 0.85rem; width: 70px;">Other</span>
+                <div class="location-bar" style="flex: 1; min-width: 100px;">
+                    <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                        <div style="width: 10%; height: 100%; background: var(--accent-primary); border-radius: 3px;"></div>
                     </div>
                 </div>
-                <span style="color: var(--text-muted);">10%</span>
+                <span style="color: var(--text-muted); font-size: 0.75rem; width: 35px;">10%</span>
             </div>
         </div>
     </div>
 
-    <div style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1.5rem;">
-        <h4 style="margin: 0 0 1.5rem; font-size: 1rem; color: var(--text-light);">Device Breakdown</h4>
-        <div style="display: flex; flex-direction: column; gap: 1rem;">
-            <div style="display: flex; align-items: center; gap: 1rem;">
-                <i class="fas fa-mobile-alt" style="width: 30px; color: var(--accent-primary); font-size: 1.2rem;"></i>
-                <span style="flex: 1; color: var(--text-light);">Mobile</span>
-                <span style="color: var(--text-muted);">65%</span>
-                <div style="width: 100px; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
-                    <div style="width: 65%; height: 100%; background: var(--accent-primary); border-radius: 4px;"></div>
+    <div style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1rem;">
+        <h4 style="margin: 0 0 1rem; font-size: 0.9rem; color: var(--text-light);">Device Breakdown</h4>
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <div class="device-item" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                <i class="fas fa-mobile-alt" style="width: 25px; color: var(--accent-primary); font-size: 1rem;"></i>
+                <span style="flex: 1; color: var(--text-light); font-size: 0.85rem;">Mobile</span>
+                <span style="color: var(--text-muted); font-size: 0.75rem;">65%</span>
+                <div class="device-bar" style="width: 80px;">
+                    <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                        <div style="width: 65%; height: 100%; background: var(--accent-primary); border-radius: 3px;"></div>
+                    </div>
                 </div>
             </div>
-            <div style="display: flex; align-items: center; gap: 1rem;">
-                <i class="fas fa-tablet-alt" style="width: 30px; color: var(--accent-primary); font-size: 1.2rem;"></i>
-                <span style="flex: 1; color: var(--text-light);">Tablet</span>
-                <span style="color: var(--text-muted);">15%</span>
-                <div style="width: 100px; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
-                    <div style="width: 15%; height: 100%; background: var(--accent-primary); border-radius: 4px;"></div>
+            <div class="device-item" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                <i class="fas fa-tablet-alt" style="width: 25px; color: var(--accent-primary); font-size: 1rem;"></i>
+                <span style="flex: 1; color: var(--text-light); font-size: 0.85rem;">Tablet</span>
+                <span style="color: var(--text-muted); font-size: 0.75rem;">15%</span>
+                <div class="device-bar" style="width: 80px;">
+                    <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                        <div style="width: 15%; height: 100%; background: var(--accent-primary); border-radius: 3px;"></div>
+                    </div>
                 </div>
             </div>
-            <div style="display: flex; align-items: center; gap: 1rem;">
-                <i class="fas fa-desktop" style="width: 30px; color: var(--accent-primary); font-size: 1.2rem;"></i>
-                <span style="flex: 1; color: var(--text-light);">Desktop</span>
-                <span style="color: var(--text-muted);">20%</span>
-                <div style="width: 100px; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
-                    <div style="width: 20%; height: 100%; background: var(--accent-primary); border-radius: 4px;"></div>
+            <div class="device-item" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                <i class="fas fa-desktop" style="width: 25px; color: var(--accent-primary); font-size: 1rem;"></i>
+                <span style="flex: 1; color: var(--text-light); font-size: 0.85rem;">Desktop</span>
+                <span style="color: var(--text-muted); font-size: 0.75rem;">20%</span>
+                <div class="device-bar" style="width: 80px;">
+                    <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                        <div style="width: 20%; height: 100%; background: var(--accent-primary); border-radius: 3px;"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -290,9 +377,9 @@
 <style>
 .status-badge {
     display: inline-block;
-    padding: 0.25rem 0.75rem;
+    padding: 0.2rem 0.6rem;
     border-radius: 50px;
-    font-size: 0.85rem;
+    font-size: 0.7rem;
     font-weight: 500;
 }
 
@@ -320,16 +407,6 @@
     transform: translateY(-2px);
     box-shadow: 0 4px 15px var(--accent-glow);
 }
-
-/* Chart animations */
-@keyframes growHeight {
-    from { height: 0; }
-    to { height: var(--target-height); }
-}
-
-.chart-bar {
-    animation: growHeight 1s ease-out;
-}
 </style>
 
 <script>
@@ -339,10 +416,8 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.addEventListener('click', function() {
             document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
-
             const days = this.dataset.days;
             // Here you would fetch new data based on days
-            // window.location.href = `/dashboard/analytics?days=${days}`;
         });
     });
 
@@ -350,10 +425,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('applyCustomRange')?.addEventListener('click', function() {
         const start = document.getElementById('startDate').value;
         const end = document.getElementById('endDate').value;
-
         if (start && end) {
-            // Here you would fetch data for custom range
-            // window.location.href = `/dashboard/analytics?start=${start}&end=${end}`;
             alert(`Fetching data from ${start} to ${end}`);
         }
     });
@@ -363,12 +435,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const sortBy = this.value;
         const tbody = document.getElementById('productsTableBody');
         const rows = Array.from(tbody.querySelectorAll('tr'));
-
         if (rows.length === 0) return;
-
         rows.sort((a, b) => {
             let aVal, bVal;
-
             if (sortBy === 'views') {
                 aVal = parseInt(a.cells[1]?.textContent || 0);
                 bVal = parseInt(b.cells[1]?.textContent || 0);
@@ -379,11 +448,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 aVal = parseFloat(a.cells[3]?.textContent || 0);
                 bVal = parseFloat(b.cells[3]?.textContent || 0);
             }
-
             return bVal - aVal;
         });
-
-        // Reorder rows
         rows.forEach(row => tbody.appendChild(row));
     });
 });
