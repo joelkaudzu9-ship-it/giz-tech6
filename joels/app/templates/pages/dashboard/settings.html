@@ -1,240 +1,246 @@
-<!-- app/templates/pages/dashboard/settings.html -->
-{% extends "base/base-dashboard.html" %}
-
-{% block dashboard_title %}Business Settings{% endblock %}
-{% block dashboard_subtitle %}Manage your business profile and preferences{% endblock %}
-
-{% block dashboard_content %}
-<div style="max-width: 900px; margin: 0 auto;">
-    <form method="POST" enctype="multipart/form-data" style="background: rgba(20,20,30,0.4); border: 1px solid var(--border-subtle); border-radius: 15px; padding: 2rem; margin-bottom: 2rem;">
-        {{ form.hidden_tag() }}
-
-        <!-- Business Information -->
-        <div style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border-subtle);">
-            <h3 style="margin-bottom: 1.5rem; font-size: 1.25rem; color: var(--text-light); display: flex; align-items: center; gap: 0.5rem;">
-                <i class="fas fa-store" style="color: var(--accent-primary);"></i>
-                Business Information
-            </h3>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                <div>
-                    <label style="display: block; margin-bottom: 0.5rem; color: var(--text-light); font-weight: 500;">Business Name *</label>
-                    {{ form.name(class="form-input", placeholder="e.g., GIZ-tech", style="width: 100%; padding: 0.75rem 1rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-light);") }}
-                </div>
-
-                <div>
-                    <label style="display: block; margin-bottom: 0.5rem; color: var(--text-light); font-weight: 500;">Business Email *</label>
-                    {{ form.email(class="form-input", type="email", placeholder="business@example.com", style="width: 100%; padding: 0.75rem 1rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-light);") }}
-                </div>
+<!-- components/cards/product-card.html (Alternative with separate click areas) -->
+<div class="product-card">
+    <a href="{{ url_for('main.product_detail', slug=product.slug or product.id) }}" class="product-card-image-link">
+        <div class="product-card-image">
+            <img src="{{ product.thumbnail or (product.image_list[0] if product.image_list else url_for('static', filename='images/placeholder.jpg')) }}"
+                 alt="{{ product.title }}"
+                 loading="lazy">
+            {% if product.is_sold %}
+            <div class="sold-overlay">
+                <i class="fas fa-check-circle"></i> SOLD
             </div>
-
-            <div style="margin-bottom: 1rem;">
-                <label style="display: block; margin-bottom: 0.5rem; color: var(--text-light); font-weight: 500;">WhatsApp Number *</label>
-                {{ form.whatsapp(class="form-input", placeholder="e.g., 265983142415", style="width: 100%; padding: 0.75rem 1rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-light);") }}
-                <small style="display: block; margin-top: 0.25rem; color: var(--text-muted); font-size: 0.8rem;">Include country code without + sign</small>
+            {% endif %}
+            {% if product.is_featured and not product.is_sold %}
+            <div class="featured-badge">
+                <i class="fas fa-star"></i> Featured
             </div>
+            {% endif %}
         </div>
-
-        <!-- Logo & Branding -->
-        <div style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border-subtle);">
-            <h3 style="margin-bottom: 1.5rem; font-size: 1.25rem; color: var(--text-light); display: flex; align-items: center; gap: 0.5rem;">
-                <i class="fas fa-palette" style="color: var(--accent-primary);"></i>
-                Logo & Branding
-            </h3>
-
-            <div style="display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;">
-                <div style="width: 100px; height: 100px; background: rgba(255,255,255,0.05); border-radius: 15px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid var(--border-subtle);">
-                    {% if business and business.logo %}
-                    <img src="{{ business.logo }}" alt="Business Logo" style="width: 100%; height: 100%; object-fit: cover;">
-                    {% else %}
-                    <i class="fas fa-store" style="font-size: 2rem; color: var(--text-muted);"></i>
-                    {% endif %}
-                </div>
-
-                <div>
-                    <label for="logo" style="display: inline-block; padding: 0.75rem 1.5rem; background: rgba(255,255,255,0.1); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-light); cursor: pointer; transition: all 0.3s ease;">
-                        <i class="fas fa-upload"></i>
-                        Upload New Logo
-                    </label>
-                    {{ form.logo(class="form-input", id="logo", accept="image/*", style="display: none;") }}
-                    <p style="margin-top: 0.5rem; color: var(--text-muted); font-size: 0.8rem;">Recommended size: 200x200px. Max 2MB</p>
-                </div>
+    </a>
+    <div class="product-card-content">
+        <a href="{{ url_for('main.product_detail', slug=product.slug or product.id) }}" class="product-card-title-link">
+            <h3 class="product-card-title">{{ product.title }}</h3>
+        </a>
+        <p class="product-card-description">{{ product.description|truncate(80) }}</p>
+        <div class="product-card-footer">
+            <div class="product-card-price">
+                <span class="price-currency">MWK</span>
+                <span class="price-value">{{ "{:,.0f}".format(product.price) }}</span>
             </div>
-        </div>
-
-        <!-- SEO Settings -->
-        <div style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border-subtle);">
-            <h3 style="margin-bottom: 1.5rem; font-size: 1.25rem; color: var(--text-light); display: flex; align-items: center; gap: 0.5rem;">
-                <i class="fas fa-search" style="color: var(--accent-primary);"></i>
-                SEO Settings
-            </h3>
-
-            <div style="margin-bottom: 1rem;">
-                <label style="display: block; margin-bottom: 0.5rem; color: var(--text-light); font-weight: 500;">Meta Title</label>
-                {{ form.meta_title(class="form-input", placeholder="GIZ-tech - Premium Tech Products", style="width: 100%; padding: 0.75rem 1rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-light);") }}
-                <small style="display: block; margin-top: 0.25rem; color: var(--text-muted); font-size: 0.8rem;">Displayed in search results (50-60 characters)</small>
-            </div>
-
-            <div style="margin-bottom: 1rem;">
-                <label style="display: block; margin-bottom: 0.5rem; color: var(--text-light); font-weight: 500;">Meta Description</label>
-                {{ form.meta_description(class="form-input", rows="3", placeholder="Discover premium tech products at GIZ-tech...", style="width: 100%; padding: 0.75rem 1rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-light); resize: vertical;") }}
-                <small style="display: block; margin-top: 0.25rem; color: var(--text-muted); font-size: 0.8rem;">Brief description for search results (150-160 characters)</small>
-            </div>
-        </div>
-
-        <!-- Analytics & Tracking -->
-        <div style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border-subtle);">
-            <h3 style="margin-bottom: 1.5rem; font-size: 1.25rem; color: var(--text-light); display: flex; align-items: center; gap: 0.5rem;">
-                <i class="fas fa-chart-line" style="color: var(--accent-primary);"></i>
-                Analytics & Tracking
-            </h3>
-
-            <div style="margin-bottom: 1rem;">
-                <label style="display: block; margin-bottom: 0.5rem; color: var(--text-light); font-weight: 500;">Google Analytics ID</label>
-                {{ form.google_analytics_id(class="form-input", placeholder="UA-XXXXX-X or G-XXXXXXX", style="width: 100%; padding: 0.75rem 1rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-light);") }}
-            </div>
-
-            <div style="margin-bottom: 1rem;">
-                <label style="display: block; margin-bottom: 0.5rem; color: var(--text-light); font-weight: 500;">Facebook Pixel ID</label>
-                {{ form.facebook_pixel_id(class="form-input", placeholder="XXXXXXXXX", style="width: 100%; padding: 0.75rem 1rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-light);") }}
-            </div>
-        </div>
-
-        <!-- Notification Settings - REPLACED SECTION -->
-        <div style="margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border-subtle);">
-            <h3 style="margin-bottom: 1.5rem; font-size: 1.25rem; color: var(--text-light); display: flex; align-items: center; gap: 0.5rem;">
-                <i class="fas fa-bell" style="color: var(--accent-primary);"></i>
-                Notification Preferences
-            </h3>
-
-            <div style="display: flex; flex-direction: column; gap: 1rem;">
-                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                    {{ form.email_notifications() }}
-                    <span style="color: var(--text-light);">Email me when I receive a new message</span>
-                </label>
-
-                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                    {{ form.whatsapp_notifications() }}
-                    <span style="color: var(--text-light);">WhatsApp me when I receive a new message</span>
-                </label>
-
-                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                    {{ form.daily_digest() }}
-                    <span style="color: var(--text-light);">Send daily digest of activity</span>
-                </label>
-            </div>
-        </div>
-
-        <!-- Form Actions -->
-        <div style="display: flex; justify-content: flex-end; gap: 1rem;">
-            <button type="reset" class="btn btn-secondary" style="padding: 0.75rem 1.5rem; background: rgba(255,255,255,0.1); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-light); cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem;">
-                <i class="fas fa-undo"></i>
-                Reset
-            </button>
-            <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.5rem; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); border: none; border-radius: 8px; color: white; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem;">
-                <i class="fas fa-save"></i>
-                Save Changes
-            </button>
-        </div>
-    </form>
-
-    <!-- Danger Zone -->
-    <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid var(--error); border-radius: 15px; padding: 2rem;">
-        <h3 style="margin-bottom: 1.5rem; font-size: 1.25rem; color: var(--error); display: flex; align-items: center; gap: 0.5rem;">
-            <i class="fas fa-exclamation-triangle"></i>
-            Danger Zone
-        </h3>
-
-        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 10px;">
-                <div>
-                    <h4 style="margin: 0 0 0.25rem; color: var(--text-light);">Reset Business Data</h4>
-                    <p style="margin: 0; color: var(--text-muted); font-size: 0.9rem;">Clear all products, messages, and reset settings to default</p>
-                </div>
-                <button class="btn btn-outline" onclick="alert('This feature is coming soon!')" style="padding: 0.75rem 1.5rem; background: transparent; border: 1px solid var(--error); border-radius: 8px; color: var(--error); cursor: pointer;">
-                    Reset Data
-                </button>
-            </div>
-
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 10px;">
-                <div>
-                    <h4 style="margin: 0 0 0.25rem; color: var(--text-light);">Export Data</h4>
-                    <p style="margin: 0; color: var(--text-muted); font-size: 0.9rem;">Download all your business data as CSV</p>
-                </div>
-                <button class="btn btn-outline" onclick="alert('Export feature coming soon! Please check back later.')" style="padding: 0.75rem 1.5rem; background: transparent; border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-light); cursor: pointer;">
-                    <i class="fas fa-download"></i>
-                    Export CSV
-                </button>
-            </div>
-
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 10px;">
-                <div>
-                    <h4 style="margin: 0 0 0.25rem; color: var(--text-light);">Delete Account</h4>
-                    <p style="margin: 0; color: var(--text-muted); font-size: 0.9rem;">Permanently delete your business and all data</p>
-                </div>
-                <button class="btn btn-outline" onclick="alert('This action cannot be undone. Please contact support.')" style="padding: 0.75rem 1.5rem; background: transparent; border: 1px solid var(--error); border-radius: 8px; color: var(--error); cursor: pointer;">
-                    Delete Account
-                </button>
+            <div class="product-card-stats">
+                <span class="product-card-views">
+                    <i class="fas fa-eye"></i> {{ product.views }}
+                </span>
+                {% if product.messages_count %}
+                <span class="product-card-messages">
+                    <i class="fas fa-envelope"></i> {{ product.messages_count }}
+                </span>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
 
 <style>
-/* Form input focus styles */
-.form-input:focus {
-    outline: none;
-    border-color: var(--accent-primary) !important;
-    background: rgba(0, 0, 0, 0.5) !important;
+.product-card {
+    background: linear-gradient(135deg, #1a1a2a 0%, #15151f 100%);
+    border-radius: 20px;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    animation: fadeInUp 0.5s ease backwards;
 }
 
-/* Button hover effects */
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px var(--accent-glow);
+.product-card:hover {
+    transform: translateY(-8px);
+    border-color: rgba(37, 99, 235, 0.4);
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
 }
 
-.btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.15) !important;
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.btn-outline:hover {
-    background: rgba(255, 255, 255, 0.05) !important;
+.product-card-image-link {
+    display: block;
+    text-decoration: none;
+    overflow: hidden;
 }
 
-/* Logo upload hover */
-label[for="logo"]:hover {
-    background: rgba(255, 255, 255, 0.15) !important;
+.product-card-image {
+    aspect-ratio: 1;
+    overflow: hidden;
+    background: #0a0a0a;
+    position: relative;
 }
 
-/* Danger zone buttons */
-.btn-outline[style*="error"]:hover {
-    background: rgba(239, 68, 68, 0.1) !important;
+.product-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.product-card:hover .product-card-image img {
+    transform: scale(1.08);
+}
+
+.sold-overlay {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    padding: 0.35rem 0.9rem;
+    border-radius: 30px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.featured-badge {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    padding: 0.35rem 0.9rem;
+    border-radius: 30px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.product-card-content {
+    padding: 1.25rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-card-title-link {
+    text-decoration: none;
+    display: block;
+}
+
+.product-card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+    transition: color 0.2s ease;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.product-card-title-link:hover .product-card-title {
+    color: #2563eb;
+}
+
+.product-card-description {
+    font-size: 0.8rem;
+    color: #a0a0a0;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.product-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: auto;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.product-card-price {
+    display: flex;
+    align-items: baseline;
+    gap: 0.2rem;
+}
+
+.price-currency {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: #a0a0a0;
+}
+
+.price-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #2563eb;
+    letter-spacing: -0.5px;
+}
+
+.product-card-stats {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.product-card-views,
+.product-card-messages {
+    font-size: 0.7rem;
+    color: #a0a0a0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+@media (max-width: 768px) {
+    .product-card-content {
+        padding: 1rem;
+    }
+
+    .product-card-title {
+        font-size: 0.9rem;
+    }
+
+    .product-card-description {
+        font-size: 0.75rem;
+    }
+
+    .price-value {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .product-card-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .product-card-stats {
+        width: 100%;
+        justify-content: space-between;
+    }
 }
 </style>
-
-<script>
-// Logo preview
-document.getElementById('logo')?.addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const logoContainer = document.querySelector('div[style*="width: 100px"]');
-            if (logoContainer) {
-                logoContainer.innerHTML = `<img src="${e.target.result}" alt="Business Logo" style="width: 100%; height: 100%; object-fit: cover;">`;
-            }
-        };
-        reader.readAsDataURL(file);
-    }
-});
-
-// Form reset handling
-document.querySelector('button[type="reset"]')?.addEventListener('click', function(e) {
-    e.preventDefault();
-    if (confirm('Reset all changes?')) {
-        window.location.reload();
-    }
-});
-</script>
-{% endblock %}
