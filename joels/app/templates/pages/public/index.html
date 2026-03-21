@@ -212,7 +212,11 @@
     padding: 6rem 2rem 4rem;
     position: relative;
     overflow: hidden;
-    background: linear-gradient(135deg, #0a0a0a 0%, #0f0f1a 50%, #0a0a0a 100%);
+    background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(0,0,0,0.9)),
+                url('https://images.unsplash.com/photo-1518770660439-4636190af475?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
 }
 
 .hero-section::before {
@@ -243,6 +247,13 @@
     position: relative;
     z-index: 2;
     animation: fadeInUp 0.8s ease;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background: rgba(10, 10, 10, 0.4);
+    border-radius: 30px;
+    padding: 3rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 .hero-title {
@@ -550,98 +561,6 @@
     animation: fadeInUp 0.6s ease;
 }
 
-/* ===== RESPONSIVE ===== */
-@media (max-width: 768px) {
-    .hero-section {
-        min-height: 70vh;
-        padding: 5rem 1.5rem 3rem;
-    }
-
-    .hero-title {
-        font-size: 2.2rem;
-    }
-
-    .hero-subtitle {
-        font-size: 1rem;
-        padding: 0 0.5rem;
-    }
-
-    .hero-actions {
-        flex-direction: column;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .hero-actions .btn {
-        width: 100%;
-        max-width: 280px;
-        justify-content: center;
-        padding: 0.875rem 1.5rem;
-    }
-
-    .featured-section,
-    .latest-section,
-    .features-section {
-        padding: 3rem 1.5rem;
-    }
-
-    .section-title {
-        font-size: 1.8rem;
-    }
-
-    .section-subtitle {
-        font-size: 0.95rem;
-    }
-
-    .products-grid {
-        grid-template-columns: 1fr;
-        gap: 1.25rem;
-    }
-
-    .features-grid {
-        grid-template-columns: 1fr;
-        gap: 1.25rem;
-    }
-
-    .feature-card {
-        padding: 1.5rem;
-    }
-
-    .feature-icon {
-        font-size: 2.5rem;
-    }
-
-    .feature-card h3 {
-        font-size: 1.2rem;
-    }
-
-    .back-to-top {
-        bottom: 1rem;
-        right: 1rem;
-        width: 45px;
-        height: 45px;
-    }
-}
-
-@media (max-width: 480px) {
-    .hero-title {
-        font-size: 1.8rem;
-    }
-
-    .hero-subtitle {
-        font-size: 0.9rem;
-    }
-
-    .section-title {
-        font-size: 1.5rem;
-    }
-
-    .btn {
-        font-size: 0.9rem;
-        padding: 0.75rem 1.5rem;
-    }
-}
-
 /* ===== NEWSLETTER SECTION ===== */
 .newsletter-section {
     max-width: 600px;
@@ -720,7 +639,82 @@
     display: none;
 }
 
+/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
+    .hero-section {
+        min-height: 70vh;
+        padding: 5rem 1.5rem 3rem;
+    }
+
+    .hero-content {
+        padding: 2rem;
+    }
+
+    .hero-title {
+        font-size: 2.2rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+        padding: 0 0.5rem;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .hero-actions .btn {
+        width: 100%;
+        max-width: 280px;
+        justify-content: center;
+        padding: 0.875rem 1.5rem;
+    }
+
+    .featured-section,
+    .latest-section,
+    .features-section {
+        padding: 3rem 1.5rem;
+    }
+
+    .section-title {
+        font-size: 1.8rem;
+    }
+
+    .section-subtitle {
+        font-size: 0.95rem;
+    }
+
+    .products-grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+    }
+
+    .features-grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+    }
+
+    .feature-card {
+        padding: 1.5rem;
+    }
+
+    .feature-icon {
+        font-size: 2.5rem;
+    }
+
+    .feature-card h3 {
+        font-size: 1.2rem;
+    }
+
+    .back-to-top {
+        bottom: 1rem;
+        right: 1rem;
+        width: 45px;
+        height: 45px;
+    }
+
     .newsletter-section {
         margin: 2rem 1rem;
         padding: 2rem;
@@ -738,6 +732,25 @@
         width: 100%;
     }
 }
+
+@media (max-width: 480px) {
+    .hero-title {
+        font-size: 1.8rem;
+    }
+
+    .hero-subtitle {
+        font-size: 0.9rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+    }
+
+    .btn {
+        font-size: 0.9rem;
+        padding: 0.75rem 1.5rem;
+    }
+}
 </style>
 
 <!-- Loading Overlay -->
@@ -750,7 +763,7 @@
     <i class="fas fa-arrow-up"></i>
 </a>
 
-<!-- Hero Section -->
+<!-- Hero Section with Background Image & Glass Morphism -->
 <section class="hero-section">
     <div class="hero-content">
         <h1 class="hero-title">
@@ -760,7 +773,7 @@
             Curated selection of high-quality gadgets and electronics for tech enthusiasts
         </p>
         <div class="hero-actions">
-            <a href="{{ url_for('main.products') }}" class="btn btn-primary" id="browseBtn">
+            <a href="{{ url_for('main.products') }}" class="btn btn-primary">
                 Browse Products
                 <i class="fas fa-arrow-right"></i>
             </a>
