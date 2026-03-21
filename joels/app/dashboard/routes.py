@@ -272,23 +272,16 @@ def toggle_hidden(product_id):
 @owner_required
 def delete_product(product_id):
     """Delete product"""
-    from flask_wtf.csrf import csrf_exempt
-    csrf_exempt(lambda: None)()
-
     product = Product.query.get_or_404(product_id)
 
     # Delete associated images
     for image_path in product.image_list:
         FileHandler.delete_image(image_path)
 
-    # Delete product
     db.session.delete(product)
     db.session.commit()
 
-    return jsonify({
-        'success': True,
-        'message': 'Product deleted successfully'
-    })
+    return jsonify({'success': True, 'message': 'Product deleted successfully'})
 
 
 @bp.route('/messages')
