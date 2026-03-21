@@ -1,50 +1,58 @@
-<div class="product-card {% if product.is_sold %}sold{% endif %}"
-     data-product-id="{{ product.id }}">
+<a href="{{ url_for('main.product_detail', slug=product.slug or product.id) }}" class="product-card-link">
+    <div class="product-card {% if product.is_sold %}sold{% endif %}"
+         data-product-id="{{ product.id }}">
 
-    <div class="card-image-container">
-        <img src="{{ product.thumbnail or (product.image_list[0] if product.image_list else url_for('static', filename='images/placeholder.jpg')) }}"
-             alt="{{ product.title }}"
-             class="card-image"
-             loading="lazy"
-             onerror="this.src='{{ url_for('static', filename='images/placeholder.jpg') }}'">
+        <div class="card-image-container">
+            <img src="{{ product.thumbnail or (product.image_list[0] if product.image_list else url_for('static', filename='images/placeholder.jpg')) }}"
+                 alt="{{ product.title }}"
+                 class="card-image"
+                 loading="lazy"
+                 onerror="this.src='{{ url_for('static', filename='images/placeholder.jpg') }}'">
 
-        {% if product.is_sold %}
-        <div class="sold-badge">
-            <span>SOLD</span>
-        </div>
-        {% endif %}
-
-        {% if product.is_featured %}
-        <div class="featured-badge">
-            <i class="fas fa-star"></i>
-        </div>
-        {% endif %}
-
-        <div class="view-overlay">
-            <i class="fas fa-eye"></i>
-            <span>{{ product.views }} views</span>
-        </div>
-    </div>
-
-    <div class="card-content">
-        <h3 class="card-title">{{ product.title }}</h3>
-        <p class="card-description">{{ product.description|truncate(100) }}</p>
-
-        <div class="card-footer">
-            <div class="price-section">
-                <span class="price">MWK {{ "{:,.0f}".format(product.price) }}</span>
+            {% if product.is_sold %}
+            <div class="sold-badge">
+                <span>SOLD</span>
             </div>
+            {% endif %}
 
-            <a href="{{ url_for('main.product_detail', slug=product.slug or product.id) }}"
-               class="btn-view">
-                View Details
-                <i class="fas fa-arrow-right"></i>
-            </a>
+            {% if product.is_featured %}
+            <div class="featured-badge">
+                <i class="fas fa-star"></i>
+            </div>
+            {% endif %}
+
+            <div class="view-overlay">
+                <i class="fas fa-eye"></i>
+                <span>{{ product.views }} views</span>
+            </div>
+        </div>
+
+        <div class="card-content">
+            <h3 class="card-title">{{ product.title }}</h3>
+            <p class="card-description">{{ product.description|truncate(100) }}</p>
+
+            <div class="card-footer">
+                <div class="price-section">
+                    <span class="price">MWK {{ "{:,.0f}".format(product.price) }}</span>
+                </div>
+
+                <span class="btn-view">
+                    View Details
+                    <i class="fas fa-arrow-right"></i>
+                </span>
+            </div>
         </div>
     </div>
-</div>
+</a>
 
 <style>
+.product-card-link {
+    text-decoration: none;
+    display: block;
+    height: 100%;
+    transition: all 0.3s ease;
+}
+
 .product-card {
     background: linear-gradient(145deg, rgba(20, 20, 30, 0.9), rgba(10, 10, 20, 0.95));
     border: 1px solid rgba(255, 255, 255, 0.05);
@@ -53,9 +61,10 @@
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     position: relative;
     box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    height: 100%;
 }
 
-.product-card:hover {
+.product-card-link:hover .product-card {
     transform: translateY(-10px) scale(1.02);
     border-color: var(--accent-primary);
     box-shadow: 0 20px 40px -10px rgba(37, 99, 235, 0.3);
@@ -75,7 +84,7 @@
     transition: transform 0.6s ease;
 }
 
-.product-card:hover .card-image {
+.product-card-link:hover .card-image {
     transform: scale(1.1);
 }
 
@@ -128,7 +137,7 @@
     z-index: 2;
 }
 
-.product-card:hover .view-overlay {
+.product-card-link:hover .view-overlay {
     bottom: 0;
 }
 
@@ -150,7 +159,7 @@
     transition: color 0.3s ease;
 }
 
-.product-card:hover .card-title {
+.product-card-link:hover .card-title {
     color: var(--accent-primary);
 }
 
@@ -183,13 +192,13 @@
     border-radius: 50px;
     font-size: 0.9rem;
     transition: all 0.3s ease;
-    text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
+    cursor: pointer;
 }
 
-.btn-view:hover {
+.product-card-link:hover .btn-view {
     background: var(--accent-primary);
     border-color: var(--accent-primary);
     transform: translateX(5px);
@@ -200,7 +209,7 @@
     transition: transform 0.3s ease;
 }
 
-.btn-view:hover i {
+.product-card-link:hover .btn-view i {
     transform: translateX(3px);
 }
 
@@ -212,5 +221,40 @@
 @keyframes spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .card-content {
+        padding: 1rem;
+    }
+
+    .card-title {
+        font-size: 1rem;
+    }
+
+    .card-description {
+        font-size: 0.8rem;
+    }
+
+    .price {
+        font-size: 1.2rem;
+    }
+
+    .btn-view {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+    }
+
+    .sold-badge {
+        padding: 0.3rem 0.7rem;
+        font-size: 0.7rem;
+    }
+
+    .featured-badge {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+    }
 }
 </style>
