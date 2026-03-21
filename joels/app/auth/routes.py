@@ -137,12 +137,12 @@ def legacy_login():
     else:
         flash('Invalid password', 'error')
 
-        @bp.route('/test-login')
-        def test_login():
-            from app.models import Owner
-            owner = Owner.query.filter_by(username='joelk').first()
-            if owner and owner.verify_password('joelkzu.k'):
-                return "Login test PASSED! Password works."
-            return "Login test FAILED"
+# app/auth/routes.py - ADD THIS AT THE VERY BOTTOM
 
-        return redirect(url_for('auth.login'))
+@bp.route('/test-login')
+def test_login():
+    from app.models import Owner
+    owner = Owner.query.filter_by(username='joelk').first()
+    if owner and owner.verify_password('joelkzu.k'):
+        return "✅ Login test PASSED! Password works."
+    return "❌ Login test FAILED"
