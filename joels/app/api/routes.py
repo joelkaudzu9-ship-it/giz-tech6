@@ -100,15 +100,6 @@ def business_info():
     return jsonify(business.to_dict())
 
 
-@bp.route('/health')
-def health():
-    return jsonify({'status': 'alive', 'timestamp': datetime.utcnow().isoformat()}), 200
-
-
-
-
-
-
 @bp.route('/export-data')
 @ajax_required
 def export_data():
