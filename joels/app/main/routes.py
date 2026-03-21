@@ -93,15 +93,17 @@ def products():
                            sort=sort,
                            search=search)
 
-@bp.route('/product/<identifier>')
-def product_detail(identifier):
+@bp.route('/product/<slug>')
+def product_detail(slug):
     """Product detail page - works with both slug and ID"""
     # Try to find by slug first
-    product = Product.query.filter_by(slug=identifier, is_hidden=False).first()
+    product = Product.query.filter_by(slug=slug, is_hidden=False).first()
+
+
 
     # If not found and identifier is a number, try by ID
-    if not product and identifier.isdigit():
-        product = Product.query.get(int(identifier))
+    if not product and slug.isdigit():
+        product = Product.query.get(int(slug))
 
     if not product:
             abort(404)
