@@ -100,6 +100,22 @@ def business_info():
     return jsonify(business.to_dict())
 
 
+@bp.route('/health')
+def health():
+    return jsonify({'status': 'alive', 'timestamp': datetime.utcnow().isoformat()}), 200
+
+
+
+
+@bp.route('/test-login')
+def test_login():
+    from app.models import Owner
+    owner = Owner.query.filter_by(username='joelk').first()
+    if owner and owner.verify_password('joelkzu.k'):
+        return "Login test PASSED! Password works."
+    return "Login test FAILED"
+
+
 @bp.route('/export-data')
 @ajax_required
 def export_data():
