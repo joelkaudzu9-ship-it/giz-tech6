@@ -107,13 +107,6 @@ def health():
 
 
 
-@bp.route('/test-login')
-def test_login():
-    from app.models import Owner
-    owner = Owner.query.filter_by(username='joelk').first()
-    if owner and owner.verify_password('joelkzu.k'):
-        return "Login test PASSED! Password works."
-    return "Login test FAILED"
 
 
 @bp.route('/export-data')
