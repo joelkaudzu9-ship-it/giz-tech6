@@ -93,7 +93,6 @@ def products():
                            sort=sort,
                            search=search)
 
-
 @bp.route('/product/<identifier>')
 def product_detail(identifier):
     """Product detail page - works with both slug and ID"""
@@ -105,7 +104,7 @@ def product_detail(identifier):
         product = Product.query.get(int(identifier))
 
     if not product:
-        abort(404)
+            abort(404)
 
     business = Business.query.first()
 
